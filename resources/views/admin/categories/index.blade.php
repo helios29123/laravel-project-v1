@@ -40,14 +40,14 @@
                                     <td><span class="badge bg-secondary">{{ $item->slug }}</span></td>
                                     <td class="text-center text-secondary small">{{ $item->created_at ? $item->created_at->format('d/m/Y') : 'N/A' }}</td>
                                     <td class="text-center">
-                                        <div class="btn-group btn-group-sm" role="group">
-                                            <a href="#" class="btn btn-outline-info" title="Sửa">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="#" class="btn btn-sm btn-outline-info" title="Sửa">
                                                 <i class="bi bi-pencil-square"></i>
                                             </a>
                                             <form action="#" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="button" class="btn btn-outline-danger" title="Xóa" onclick="alert('Tính năng xóa chưa được kích hoạt ở Controller!')">
+                                                <button type="button" class="btn btn-sm btn-outline-danger" title="Xóa" onclick="alert('Tính năng xóa chưa được kích hoạt ở Controller!')">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>

@@ -13,10 +13,15 @@ class Attribute extends Model
 
     protected $fillable = [
         'name',
+        'category_id'
     ];
 
     public function values()
     {
         return $this->hasMany(AttributeValue::class, 'attribute_id', 'attribute_id');
+    }
+
+    public function category() {
+        return $this->belongsTo(Category::class, 'category_id', 'category_id');
     }
 }

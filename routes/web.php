@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ProductController;
 
 Route::get('/', [HomeController::class, 'index']);
 
@@ -42,6 +43,8 @@ Route::get('/register', function() {
 
 //admin_route here
 Route::prefix('admin')->group(function() {
+    Route::get('/', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');
     Route::resource('categories', CategoryController::class);
+    Route::resource('products', ProductController::class);
+    Route::get('categories/{id}/attributes', [App\Http\Controllers\Admin\ProductController::class, 'getAttributes'])->name('admin.categories.attributes');
 });
-

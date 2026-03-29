@@ -89,10 +89,23 @@
     <!-- Bao gồm Header -->
     @include('layouts.header')
 
-    <!-- Phần content chính -->
-    <main class="main-content container mt-4 mb-5">
-        @yield('content')
-    </main>
+    <!-- Phần Bố Cục Thông Minh Tự Động Rẽ Nhánh Layout (Admin/Client) -->
+    <div class="d-flex w-100 h-100 align-items-stretch">
+        @if(request()->is('admin*'))
+            <!-- Sidebar dành riêng cho khu vực Admin -->
+            @include('layouts.admin_sidebar')
+            
+            <!-- Phần Content Admin sẽ mở rộng độ rộng còn lại và có nền tối hơn -->
+            <main class="main-content flex-grow-1 p-4" style="min-width: 0; background-color: var(--dark-bg); min-height: 100vh;">
+        @else
+            <!-- Phần content chính cho Khách Hàng (Nằm trong Container giới hạn chiều rộng giữa màn hình) -->
+            <main class="main-content container mt-4 mb-5">
+        @endif
+        
+            @yield('content')
+            
+        </main>
+    </div>
 
     <!-- Bao gồm Footer -->
     @include('layouts.footer')
