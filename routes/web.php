@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\UserController;
 
 // ----- ROUTE BREEZE (AUTH) -----
 Route::redirect('/dashboard', '/admin')->name('dashboard');
@@ -56,4 +57,10 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function() {
     Route::resource('categories', CategoryController::class);
     Route::resource('products', ProductController::class);
     Route::get('categories/{id}/attributes', [App\Http\Controllers\Admin\ProductController::class, 'getAttributes'])->name('admin.categories.attributes');
+    
+    // User Routes
+    Route::get('users', [UserController::class, 'index'])->name('users.index');
+    Route::patch('users/{id}/toggle-role', [UserController::class, 'toggleRole'])->name('users.toggle-role');
+    Route::patch('users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+    Route::delete('users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 });

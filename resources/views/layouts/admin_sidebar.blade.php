@@ -124,7 +124,7 @@
             </a>
         </li>
         <li class="sidebar-item">
-            <a href="#" class="sidebar-link text-muted" onclick="alert('Tính năng Quản lý Khách hàng đang chờ code'); return false;">
+            <a href="{{ route('users.index') }}" class="sidebar-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
                 <i class="bi bi-people-fill sidebar-icon"></i>
                 Hồ Sơ Điện Tử (Users)
             </a>
