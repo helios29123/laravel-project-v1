@@ -1,0 +1,8 @@
+{
+    "name": "du-an-laravel-1",
+    "commands": {
+        "Start Laravel": "php artisan serve",
+        "Run Node": "node index.js",
+        "Run Dev": "npm run dev"
+    }
+}
