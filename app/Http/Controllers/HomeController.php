@@ -20,15 +20,15 @@ class HomeController extends Controller
         $newProducts = Product::where('status', 'active')->orderBy('created_at', 'desc')->take(6)->get();
 
         //6 San pham ban chay nhat
-        $bestSellingProducts = Product::where('status', 'active')->orderBy('sold_count', 'desc')->take(6)->get();
+        $bestSellingProducts = Product::where('status', 'active')->orderBy('created_at', 'asc')->take(6)->get();
 
         //6 San pham nhieu luot xem nhat
-        $viewedProducts = Product::where('status', 'active')->orderBy('view_count', 'desc')->take(6)->get();
+        $viewedProducts = Product::where('status', 'active')->orderBy('created_at', 'desc')->take(6)->get();
         
         return view('home', compact('categories', 'newProducts', 'bestSellingProducts', 'viewedProducts'));   
     }
     public function show($id) {
-        $product = Product::where('status', 'active')->findOrFail($id);
+        $product = Product::with(['images', 'variants'])->where('status', 'active')->findOrFail($id);
         
         // Tăng lượt xem (Tùy chọn, nếu muốn cập nhật db thêm lượt xem)
         // $product->increment('view_count');

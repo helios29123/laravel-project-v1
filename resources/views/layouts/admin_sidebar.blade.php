@@ -118,7 +118,7 @@
 
         <li class="sidebar-heading mt-4">Trung Tâm Kinh Doanh</li>
         <li class="sidebar-item">
-            <a href="#" class="sidebar-link text-muted" onclick="alert('Tính năng Quản lý Đơn hàng đang chờ code'); return false;">
+            <a href="{{ route('admin.orders.index') }}" class="sidebar-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
                 <i class="bi bi-cart-check-fill sidebar-icon"></i>
                 Quản Lý Đơn Hàng
             </a>

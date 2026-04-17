@@ -185,9 +185,13 @@
                 datasets: [{
                     data: ordData,
                     backgroundColor: [
-                        '#10b981', // green (Hoàn thành)
-                        '#f59e0b', // yellow (Đang giao)
-                        '#ef4444'  // red (Hủy)
+                        '#10b981', // completed
+                        '#f59e0b', // processing
+                        '#0d6efd', // shipped
+                        '#0dcaf0', // paid
+                        '#6c757d', // pending
+                        '#dc3545', // cancelled
+                        '#6f42c1'  // failed
                     ],
                     borderWidth: 0,
                     hoverOffset: 4

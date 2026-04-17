@@ -72,11 +72,24 @@
                                 <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->full_name }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-dark-custom border-danger mt-2 shadow-lg">
-                                <li>
-                                    <a class="dropdown-item custom-hover tech-font-sm" href="{{ route('admin.dashboard') }}">
-                                        <i class="bi bi-speedometer2 me-2"></i> Bảng điều khiển
-                                    </a>
-                                </li>
+                                @if(Auth::user()->isAdmin())
+                                    <li>
+                                        <a class="dropdown-item custom-hover tech-font-sm" href="{{ route('admin.dashboard') }}">
+                                            <i class="bi bi-speedometer2 me-2"></i> Bảng điều khiển
+                                        </a>
+                                    </li>
+                                @else
+                                    <li>
+                                        <a class="dropdown-item custom-hover tech-font-sm" href="{{ route('orders.index') }}">
+                                            <i class="bi bi-clock-history me-2"></i> Đơn hàng của tôi
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item custom-hover tech-font-sm" href="{{ route('profile.edit') }}">
+                                            <i class="bi bi-person me-2"></i> Hồ sơ của tôi
+                                        </a>
+                                    </li>
+                                @endif
                                 <li><hr class="dropdown-divider border-secondary opacity-25"></li>
                                 <li>
                                     <form method="POST" action="{{ route('logout') }}">

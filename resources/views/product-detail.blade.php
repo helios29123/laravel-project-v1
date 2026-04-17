@@ -67,9 +67,15 @@
 
             <div class="bg-dark p-3 rounded mb-4 border border-secondary">
                 <div class="d-flex align-items-center">
-                    <h2 class="text-laravel fw-bold mb-0 me-3">{{ number_format($product->price, 0, ',', '.') }}₫</h2>
-                    @if(isset($product->old_price) || $product->price < 150000)
-                        <span class="text-white text-decoration-line-through fs-5 me-2">{{ number_format($product->price * 1.2, 0, ',', '.') }}₫</span>
+                    <h2 class="text-laravel fw-bold mb-0 me-3" id="product-price">
+                        @if($product->variants->count() > 0)
+                            {{ number_format($product->variants->first()->price, 0, ',', '.') }}₫
+                        @else
+                            Liên hệ
+                        @endif
+                    </h2>
+                    @if(isset($product->old_price) || ($product->variants->count() > 0 && $product->variants->first()->price < 150000))
+                        <span class="text-white text-decoration-line-through fs-5 me-2">{{ number_format(($product->variants->count() > 0 ? $product->variants->first()->price : 0) * 1.2, 0, ',', '.') }}₫</span>
                         <span class="badge bg-danger">-20%</span>
                     @endif
                 </div>
@@ -92,11 +98,38 @@
                     <input type="text" id="qtyInput" class="form-control text-center bg-dark text-white border-secondary" value="1">
                     <button class="btn btn-outline-secondary text-white" type="button" onclick="increaseQty()"><i class="bi bi-plus"></i></button>
                 </div>
-                <div class="text-white small">Kho: 125 sản phẩm</div>
+                <div class="text-white small" id="stock-info">
+                    @if($product->variants->count() > 0)
+                        Kho: {{ $product->variants->first()->stock_quantity }} sản phẩm
+                    @else
+                        Hết hàng
+                    @endif
+                </div>
             </div>
 
+            @if($product->variants->count() > 1)
+            <div class="mb-4">
+                <label class="form-label text-white fw-bold">Chọn phiên bản:</label>
+                <div class="d-flex flex-wrap gap-2" id="variant-selector">
+                    @foreach($product->variants as $variant)
+                    <button class="btn btn-outline-secondary variant-btn {{ $loop->first ? 'active' : '' }}"
+                            type="button"
+                            data-variant-id="{{ $variant->product_variant_id }}"
+                            data-price="{{ $variant->price }}"
+                            data-stock="{{ $variant->stock_quantity }}"
+                            data-sku="{{ $variant->sku }}">
+                        {{ $variant->sku }} - {{ number_format($variant->price, 0, ',', '.') }}₫
+                    </button>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
             <div class="d-flex gap-2">
-                <button class="btn btn-outline-laravel btn-lg px-4 flex-grow-1 shadow-sm d-flex align-items-center justify-content-center" title="Thêm vào giỏ hàng">
+                <button class="btn btn-outline-laravel btn-lg px-4 flex-grow-1 shadow-sm d-flex align-items-center justify-content-center"
+                        id="add-to-cart-btn"
+                        title="Thêm vào giỏ hàng"
+                        @if($product->variants->count() == 0) disabled @endif>
                     <i class="bi bi-cart-plus me-2 fs-5"></i> THÊM VÀO GIỎ
                 </button>
                 <a href="/checkout" class="btn btn-laravel btn-lg px-4 flex-grow-1 shadow d-flex align-items-center justify-content-center text-decoration-none">
@@ -318,6 +351,133 @@
             });
         }
     });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    let selectedVariantId = @if($product->variants->count() > 0) {{ $product->variants->first()->product_variant_id }} @else null @endif;
+
+    if (!csrfToken) {
+        console.error('CSRF token not found. AJAX add-to-cart will not work.');
+        return;
+    }
+
+    console.log('Initial selectedVariantId:', selectedVariantId);
+    console.log('CSRF Token exists:', !!csrfToken);
+    console.log('Product variants count:', @json($product->variants->count()));
+    console.log('Product variants:', @json($product->variants->toArray()));
+
+    // Handle variant selection
+    document.querySelectorAll('.variant-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            console.log('Variant button clicked:', this.dataset);
+            // Remove active class from all buttons
+            document.querySelectorAll('.variant-btn').forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            this.classList.add('active');
+
+            // Update selected variant
+            selectedVariantId = this.dataset.variantId;
+            const price = this.dataset.price;
+            const stock = this.dataset.stock;
+
+            console.log('Updated selectedVariantId:', selectedVariantId);
+
+            // Update price display
+            document.getElementById('product-price').textContent = new Intl.NumberFormat('vi-VN').format(price) + '₫';
+
+            // Update stock info
+            document.getElementById('stock-info').textContent = 'Kho: ' + stock + ' sản phẩm';
+
+            // Enable/disable add to cart button
+            const addToCartBtn = document.getElementById('add-to-cart-btn');
+            addToCartBtn.disabled = stock == 0;
+        });
+    });
+
+    // Handle add to cart
+    document.getElementById('add-to-cart-btn').addEventListener('click', function() {
+        console.log('Add to cart clicked');
+        console.log('selectedVariantId:', selectedVariantId);
+        console.log('Product has variants:', @json($product->variants->count() > 0));
+
+        if (@json($product->variants->count() == 0)) {
+            alert('Sản phẩm này hiện không có phiên bản nào để mua');
+            return;
+        }
+
+        if (!selectedVariantId) {
+            alert('Vui lòng chọn phiên bản sản phẩm');
+            return;
+        }
+
+        const quantity = parseInt(document.getElementById('qtyInput').value);
+        console.log('Quantity:', quantity);
+
+        if (quantity < 1) {
+            alert('Số lượng phải lớn hơn 0');
+            return;
+        }
+
+        const requestData = {
+            product_variant_id: selectedVariantId,
+            quantity: quantity
+        };
+        console.log('Request data:', requestData);
+
+        fetch('/cart/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.message) {
+                alert(data.message);
+                // Optionally update cart count in header
+                updateCartCount();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi thêm vào giỏ hàng');
+        });
+    });
+
+    function updateCartCount() {
+        fetch('/cart/count')
+        .then(response => response.json())
+        .then(data => {
+            // Update cart count in header if exists
+            const cartCountElement = document.querySelector('.cart-count');
+            if (cartCountElement) {
+                cartCountElement.textContent = data.count;
+            }
+        })
+        .catch(error => console.error('Error updating cart count:', error));
+    }
+});
+
+function increaseQty() {
+    const qtyInput = document.getElementById('qtyInput');
+    qtyInput.value = parseInt(qtyInput.value) + 1;
+}
+
+function decreaseQty() {
+    const qtyInput = document.getElementById('qtyInput');
+    const currentValue = parseInt(qtyInput.value);
+    if (currentValue > 1) {
+        qtyInput.value = currentValue - 1;
+    }
+}
 </script>
 @endsection
 @endsection
